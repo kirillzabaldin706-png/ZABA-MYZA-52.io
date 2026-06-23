@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no"/>
+<title>ZABA MUZYKA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0c;
+    --surface: #161616;
+    --surface2: #1f1f1f;
+    --surface3: #2a2a2a;
+    --yellow: #ffcc00;
+    --yellow-dim: rgba(255,204,0,.15);
+    --red: #ef4444;
+    --green: #22c55e;
+    --text: #ffffff;
+    --text2: #a8a8a8;
+    --text3: #6b6b6b;
+    --border: rgba(255,255,255,0.08);
+    --radius: 12px;
+    --font: 'Manrope', sans-serif;
+    --mono: 'Space Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== AUTH SCREEN ===== */
+  #authScreen {
+    position: fixed; inset: 0; z-index: 9998;
+    background: radial-gradient(circle at 30% 20%, #1a1a14 0%, #0c0c0c 60%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .auth-box {
+    width: 100%; max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 38px 36px;
+    margin: 16px;
+    max-height: 92vh; overflow-y: auto;
+  }
+  .auth-logo { text-align: center; margin-bottom: 26px; }
+  .auth-logo-icon {
+    width: 54px; height: 54px; background: var(--yellow); border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 800; color: #0c0c0c; margin: 0 auto 12px;
+  }
+  .auth-title { font-size: 19px; font-weight: 800; letter-spacing: -0.3px; }
+  .auth-title span { color: var(--yellow); }
+  .auth-tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 14px; padding: 4px; margin-bottom: 24px; }
+  .auth-tab {
+    flex: 1; text-align: center; padding: 10px; border-radius: 11px; cursor: pointer;
+    font-size: 13.5px; font-weight: 700; color: var(--text2); transition: all .2s; border: none; background: none; font-family: var(--font);
+  }
+  .auth-tab.active { background: var(--yellow); color: #0c0c0c; }
+  .auth-form { display: flex; flex-direction: column; gap: 14px; }
+  .auth-err {
+    background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.25);
+    border-radius: 10px; padding: 11px 14px; font-size: 13px; color: #fca5a5; display: none;
+  }
+  .auth-err.show { display: block; }
+  .auth-group { display: flex; flex-direction: column; gap: 6px; }
+  .auth-group label { font-size: 11.5px; font-weight: 700; color: var(--text2); letter-spacing: .3px; text-transform: uppercase; }
+  .auth-group input {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 11px 14px; color: var(--text); font-family: var(--font); font-size: 14px; outline: none; transition: border .2s; width: 100%;
+  }
+  .auth-group input:focus { border-color: var(--yellow); }
+  .auth-group input::placeholder { color: var(--text3); }
+  .auth-pw-wrap { position: relative; }
+  .auth-pw-wrap input { padding-right: 42px; }
+  .auth-show-pw { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text3); padding: 4px; }
+  .auth-show-pw:hover { color: var(--text); }
+  .auth-check-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 2px; }
+  .auth-check-row input[type=checkbox] {
+    width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; accent-color: var(--yellow); cursor: pointer;
+  }
+  .auth-check-row label { font-size: 12.5px; color: var(--text2); line-height: 1.5; cursor: pointer; }
+  .auth-check-row a { color: var(--yellow); text-decoration: none; font-weight: 600; }
+  .auth-check-row a:hover { text-decoration: underline; }
+  .auth-submit-btn {
+    width: 100%; padding: 13px; background: var(--yellow); color: #0c0c0c; border: none; border-radius: 24px;
+    font-size: 15px; font-weight: 700; font-family: var(--font); cursor: pointer; transition: all .15s; margin-top: 4px;
+  }
+  .auth-submit-btn:hover { transform: scale(1.02); }
+  .auth-submit-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+  .auth-guest-link { text-align: center; margin-top: 18px; font-size: 12.5px; color: var(--text3); }
+  .auth-guest-link a { color: var(--text2); cursor: pointer; font-weight: 600; text-decoration: underline; }
+  .auth-guest-link a:hover { color: var(--yellow); }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 232px;
+    background: var(--surface);
+    display: flex; flex-direction: column;
+    z-index: 100;
+    padding: 0 0 80px;
+  }
+  .logo {
+    padding: 26px 24px 22px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--yellow);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    color: #0c0c0c; font-weight: 800;
+  }
+  .logo-text {
+    font-size: 15px; font-weight: 800;
+    letter-spacing: -0.3px;
+    line-height: 1.15;
+    color: var(--text);
+  }
+  .logo-text span { color: var(--yellow); }
+
+  .nav { padding: 8px 12px; flex: 1; overflow-y: auto; }
+  .nav-section-label {
+    font-size: 11px; font-weight: 700;
+    color: var(--text3); letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 18px 12px 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 13px;
+    padding: 10px 12px; border-radius: 10px;
+    cursor: pointer; color: var(--text2);
+    font-size: 14px; font-weight: 600;
+    transition: all .15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--surface2); color: var(--yellow); }
+  .nav-item svg { flex-shrink: 0; }
+
+  .playlist-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 8px 12px; border-radius: 10px;
+    cursor: pointer; color: var(--text2);
+    font-size: 13.5px; font-weight: 500;
+    transition: all .15s;
+  }
+  .playlist-item:hover { background: var(--surface2); color: var(--text); }
+  .playlist-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--yellow);
+    flex-shrink: 0;
+  }
+
+  /* sidebar footer (account / admin) */
+  .sidebar-footer {
+    padding: 12px 12px 0;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+  }
+  .account-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px; cursor: pointer;
+    transition: background .15s;
+  }
+  .account-row:hover { background: var(--surface2); }
+  .account-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--yellow); color: #0c0c0c;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }
+  .account-info { min-width: 0; flex: 1; }
+  .account-email { font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .account-sub { font-size: 11px; color: var(--text3); }
+
+  /* ===== MAIN ===== */
+  .main {
+    margin-left: 232px;
+    margin-bottom: 90px;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(12,12,12,0.9);
+    backdrop-filter: blur(20px);
+    padding: 16px 32px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .search-wrap {
+    flex: 1; max-width: 440px;
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid transparent;
+    border-radius: 24px;
+    padding: 11px 16px 11px 42px;
+    color: var(--text); font-family: var(--font); font-size: 14px;
+    outline: none; transition: all .2s;
+  }
+  .search-wrap input:focus { border-color: var(--yellow); background: var(--surface3); }
+  .search-wrap input::placeholder { color: var(--text3); }
+  .search-icon {
+    position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+    color: var(--text3);
+  }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--yellow);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; cursor: pointer;
+    color: #0c0c0c;
+  }
+
+  .content { padding: 28px 32px; }
+
+  .hero {
+    background: linear-gradient(135deg, #1a1a14 0%, #161616 60%);
+    border-radius: 20px;
+    padding: 44px;
+    margin-bottom: 32px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -80px; right: -40px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(255,204,0,.12) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .hero-label {
+    font-size: 12px; font-weight: 700;
+    color: var(--yellow); letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .hero-title {
+    font-size: 44px; font-weight: 800; line-height: 1.05;
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+  }
+  .hero-sub { color: var(--text2); font-size: 15px; margin-bottom: 28px; }
+  .hero-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--yellow);
+    color: #0c0c0c; border: none; border-radius: 24px;
+    padding: 13px 26px; font-size: 14px; font-weight: 700;
+    font-family: var(--font); cursor: pointer;
+    transition: all .15s; display: flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { transform: scale(1.03); }
+  .btn-ghost {
+    background: var(--surface2); color: var(--text);
+    border: none; border-radius: 24px;
+    padding: 13px 22px; font-size: 14px; font-weight: 600;
+    font-family: var(--font); cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-ghost:hover { background: var(--surface3); }
+
+  .section { margin-bottom: 36px; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+  }
+  .section-title { font-size: 21px; font-weight: 800; letter-spacing: -0.3px; }
+  .section-link { font-size: 13px; color: var(--text2); cursor: pointer; font-weight: 600; }
+  .section-link:hover { color: var(--yellow); }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 18px;
+  }
+  .card { cursor: pointer; transition: all .2s; position: relative; }
+  .card:hover .card-title { color: var(--yellow); }
+  .card-cover {
+    width: 100%; aspect-ratio: 1;
+    border-radius: 10px;
+    background: var(--surface2);
+    margin-bottom: 12px;
+    overflow: hidden; position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .card-cover-placeholder { font-size: 40px; }
+  .card-play-btn {
+    position: absolute; bottom: 8px; right: 8px;
+    width: 40px; height: 40px;
+    background: var(--yellow);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transform: translateY(6px) scale(.9);
+    transition: all .2s;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4);
+  }
+  .card:hover .card-play-btn { opacity: 1; transform: translateY(0) scale(1); }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; transition: color .15s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-meta { font-size: 12.5px; color: var(--text3);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* WAVE CARD */
+  .wave-card {
+    background: linear-gradient(135deg, #2a2400 0%, #161616 70%);
+    border: 1px solid rgba(255,204,0,.2);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 32px;
+    position: relative; overflow: hidden;
+  }
+  .wave-card::after {
+    content: ''; position: absolute; top: -40px; left: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(255,204,0,.15), transparent 70%);
+    border-radius: 50%;
+  }
+  .wave-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; position: relative; z-index: 1; }
+  .wave-icon { font-size: 26px; }
+  .wave-title { font-size: 19px; font-weight: 800; }
+  .wave-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; position: relative; z-index: 1; }
+  .wave-chip {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text2);
+    padding: 7px 16px; border-radius: 20px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; transition: all .15s;
+  }
+  .wave-chip:hover { color: var(--text); border-color: var(--text2); }
+  .wave-chip.active { background: var(--yellow); color: #0c0c0c; border-color: var(--yellow); }
+  .wave-actions { position: relative; z-index: 1; }
+
+  /* TRACKS LIST */
+  .tracks-list { display: flex; flex-direction: column; gap: 2px; }
+  .track-item {
+    display: grid;
+    grid-template-columns: 30px 52px 1fr auto auto;
+    align-items: center; gap: 14px;
+    padding: 9px 12px; border-radius: 10px;
+    cursor: pointer; transition: background .12s;
+  }
+  .track-item:hover { background: var(--surface2); }
+  .track-item.playing { background: var(--yellow-dim); }
+  .track-num {
+    font-family: var(--mono); font-size: 12px; color: var(--text3);
+    text-align: center;
+  }
+  .track-item.playing .track-num { color: var(--yellow); }
+  .track-cover {
+    width: 42px; height: 42px; border-radius: 7px;
+    background: var(--surface3);
+    overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 19px;
+  }
+  .track-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .track-info { min-width: 0; }
+  .track-name { font-size: 14px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-artist { font-size: 12.5px; color: var(--text2); margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-item.playing .track-name { color: var(--yellow); }
+  .track-duration { font-size: 12px; color: var(--text3); font-family: var(--mono); }
+  .track-like {
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); padding: 4px; border-radius: 6px;
+    transition: all .15s; display: flex;
+  }
+  .track-like:hover { color: var(--yellow); }
+  .track-like.liked { color: var(--yellow); }
+
+  /* ===== AD BANNER ===== */
+  .ad-banner {
+    position: fixed; bottom: 88px; left: 232px; right: 0; z-index: 150;
+    background: linear-gradient(90deg, #2b1fb0, #5b3fe0);
+    padding: 12px 24px;
+    display: flex; align-items: center; gap: 16px;
+    font-size: 13.5px;
+  }
+  .ad-banner-icons { display: flex; gap: -6px; }
+  .ad-banner-icons span { font-size: 18px; margin-right: -4px; }
+  .ad-banner-text { flex: 1; min-width: 0; color: #fff; font-weight: 500; }
+  .ad-banner-text b { font-weight: 800; }
+  .ad-banner-btn {
+    background: var(--yellow); color: #0c0c0c; border: none; border-radius: 20px;
+    padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: var(--font);
+    white-space: nowrap;
+  }
+  .ad-banner-btn2 {
+    background: rgba(255,255,255,.15); color: #fff; border: none; border-radius: 20px;
+    padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: var(--font);
+    white-space: nowrap;
+  }
+  .ad-banner-close {
+    background: none; border: none; color: rgba(255,255,255,.6); cursor: pointer; font-size: 18px; padding: 4px;
+  }
+  .ad-banner-close:hover { color: #fff; }
+
+  /* AD AUDIO OVERLAY */
+  .ad-audio-overlay {
+    position: fixed; bottom: 88px; left: 0; right: 0; z-index: 160;
+    background: #1a1a05;
+    border-top: 1px solid rgba(255,204,0,.3);
+    padding: 10px 32px;
+    display: flex; align-items: center; gap: 14px;
+    font-size: 13px;
+  }
+  .ad-audio-tag { background: var(--yellow); color: #0c0c0c; font-weight: 800; font-size: 10.5px; padding: 3px 9px; border-radius: 6px; letter-spacing: .5px; text-transform: uppercase; }
+  .ad-audio-text { color: var(--text2); flex: 1; }
+  .ad-audio-timer { font-family: var(--mono); color: var(--text3); font-size: 12px; }
+
+  /* PLAYER */
+  .player {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    background: #151515;
+    border-top: 1px solid var(--border);
+    padding: 0 24px;
+    height: 88px;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center; gap: 24px;
+  }
+  .player-track { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .player-cover {
+    width: 54px; height: 54px; border-radius: 8px;
+    background: var(--surface3); flex-shrink: 0;
+    overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .player-cover img { width: 100%; height: 100%; object-fit: cover; }
+  .player-info { min-width: 0; }
+  .player-name { font-size: 14px; font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .player-artist { font-size: 12.5px; color: var(--text2); margin-top: 2px; }
+  .player-heart { background: none; border: none; cursor: pointer;
+    color: var(--text3); margin-left: 8px; display: flex; transition: color .15s; }
+  .player-heart:hover { color: var(--yellow); }
+  .player-heart.liked { color: var(--yellow); }
+
+  .player-center { display: flex; flex-direction: column; align-items: center; gap: 9px; }
+  .player-controls { display: flex; align-items: center; gap: 22px; }
+  .ctrl-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text2); display: flex; align-items: center;
+    transition: color .15s;
+  }
+  .ctrl-btn:hover { color: var(--text); }
+  .ctrl-btn.active { color: var(--yellow); }
+  .play-btn {
+    width: 40px; height: 40px;
+    background: var(--yellow);
+    border-radius: 50%; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s;
+  }
+  .play-btn:hover { transform: scale(1.07); }
+
+  .progress-wrap { width: 100%; display: flex; align-items: center; gap: 10px; }
+  .time { font-size: 11px; color: var(--text3); font-family: var(--mono); white-space: nowrap; }
+  .progress-bar {
+    flex: 1; height: 4px; background: var(--surface3);
+    border-radius: 2px; cursor: pointer; position: relative;
+  }
+  .progress-fill {
+    height: 100%; background: var(--yellow);
+    border-radius: 2px; transition: width .3s linear;
+    position: relative;
+  }
+  .progress-fill::after {
+    content: ''; position: absolute; right: -5px; top: -4px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--yellow);
+    opacity: 0; transition: opacity .2s;
+  }
+  .progress-bar:hover .progress-fill::after { opacity: 1; }
+
+  .player-right { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+  .volume-wrap { display: flex; align-items: center; gap: 8px; }
+  .volume-bar {
+    width: 80px; height: 4px; background: var(--surface3);
+    border-radius: 2px; cursor: pointer;
+  }
+  .volume-fill {
+    height: 100%; background: var(--text2);
+    border-radius: 2px; width: 80%;
+  }
+
+  .eq-bars { display: flex; align-items: flex-end; gap: 2px; height: 16px; }
+  .eq-bar {
+    width: 3px; background: var(--yellow);
+    border-radius: 1px; animation: eq 0.8s ease-in-out infinite;
+  }
+  .eq-bar:nth-child(1) { animation-delay: 0s; }
+  .eq-bar:nth-child(2) { animation-delay: .15s; }
+  .eq-bar:nth-child(3) { animation-delay: .3s; }
+  .eq-bar:nth-child(4) { animation-delay: .1s; }
+  @keyframes eq { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+
+  .hidden { display: none !important; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  .toast {
+    position: fixed; bottom: 100px; right: 24px; z-index: 9999;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 18px;
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+    opacity: 0; transform: translateY(10px);
+    transition: all .3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); flex-shrink: 0; }
+
+  .loading-screen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px;
+  }
+  .loading-logo { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+  .loading-logo span { color: var(--yellow); }
+  .loading-bar { width: 200px; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .loading-bar-fill { height: 100%; background: var(--yellow); border-radius: 2px; animation: loadbar 1.5s ease-in-out forwards; }
+  @keyframes loadbar { from { width: 0 } to { width: 100% } }
+
+  /* SETTINGS PAGE */
+  .settings-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; max-width: 520px; }
+
+  /* BONUS / SUBSCRIPTION PAGE */
+  .bonus-hero {
+    background: linear-gradient(135deg, #2a2400 0%, #161616 70%);
+    border: 1px solid rgba(255,204,0,.2);
+    border-radius: 20px; padding: 32px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  }
+  .bonus-balance-label { font-size: 12px; color: var(--yellow); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .bonus-balance-value { font-size: 40px; font-weight: 800; letter-spacing: -1px; }
+  .bonus-balance-sub { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .sub-status-badge { background: var(--yellow); color: #0c0c0c; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 800; }
+  .sub-status-badge.inactive { background: var(--surface3); color: var(--text2); }
+
+  .tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .task-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .task-icon { font-size: 26px; }
+  .task-name { font-size: 14.5px; font-weight: 700; }
+  .task-desc { font-size: 12.5px; color: var(--text2); flex: 1; }
+  .task-reward { font-size: 12.5px; color: var(--yellow); font-weight: 700; }
+  .task-btn { background: var(--surface2); color: var(--text); border: none; border-radius: 18px; padding: 8px 16px; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all .15s; font-family: var(--font); }
+  .task-btn:hover { background: var(--surface3); }
+  .task-btn.done { background: var(--yellow-dim); color: var(--yellow); cursor: default; }
+
+  .plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 16px; max-width: 420px; }
+  .plan-card.featured { border-color: var(--yellow); background: linear-gradient(135deg, rgba(255,204,0,.08), var(--surface)); }
+  .plan-name { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+  .plan-price { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+  .plan-price span { font-size: 13px; color: var(--text3); font-weight: 500; }
+  .plan-features { list-style: none; margin: 14px 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .plan-features li { font-size: 13px; color: var(--text2); display: flex; align-items: center; gap: 8px; }
+  .plan-features li svg { flex-shrink: 0; color: var(--yellow); }
+
+  /* SUBMIT TRACK PAGE */
+  .submit-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; max-width: 540px; }
+  .submit-panel .form-grp { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .submit-panel label { font-size: 11.5px; font-weight: 700; color: var(--text2); letter-spacing: .3px; text-transform: uppercase; }
+  .submit-panel input, .submit-panel textarea, .submit-panel select {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 11px 14px; color: var(--text); font-family: var(--font); font-size: 14px; outline: none; width: 100%;
+  }
+  .submit-panel input:focus, .submit-panel textarea:focus, .submit-panel select:focus { border-color: var(--yellow); }
+  .submit-panel textarea { resize: vertical; min-height: 70px; }
+  .submit-panel select option { background: var(--surface2); }
+  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-label { font-size: 14px; font-weight: 600; }
+  .settings-sub { font-size: 12.5px; color: var(--text3); margin-top: 2px; }
+  .toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--surface3); border-radius: 14px; cursor: pointer; transition: background .2s; }
+  .toggle-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform .2s; }
+  .toggle input:checked + .toggle-slider { background: var(--yellow); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+  /* ===== DROP AREA & FILE PREVIEW (для загрузки файлов) ===== */
+  .drop-area {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    color: var(--text2);
+    background: var(--surface2);
+  }
+  .drop-area:hover, .drop-area.dragover {
+    border-color: var(--yellow);
+    background: rgba(255,204,0,.04);
+    color: var(--text);
+  }
+  .drop-icon { font-size: 34px; margin-bottom: 10px; }
+  .drop-label { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .drop-sub { font-size: 12px; color: var(--text3); }
+  .file-preview {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--surface3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .file-preview-info { flex: 1; min-width: 0; }
+  .file-preview-name {
+    font-size: 13px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .file-preview-size { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .file-preview-duration { font-size: 11px; color: var(--yellow); margin-top: 2px; }
+  .file-preview-remove {
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); padding: 4px; transition: color .2s;
+    font-size: 16px;
+  }
+  .file-preview-remove:hover { color: var(--red); }
+  .upload-progress { margin-top: 14px; }
+  .upload-progress .progress-bar { height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+  .upload-progress .progress-fill { height: 100%; background: var(--yellow); border-radius: 3px; transition: width .3s; }
+  .upload-progress .progress-label { font-size: 12px; color: var(--text2); display: flex; justify-content: space-between; }
+
+  @media (max-width: 900px) {
+    .sidebar { width: 64px; }
+    .logo-text, .nav-section-label, .nav-item span, .account-info { display: none; }
+    .nav-item { justify-content: center; padding: 10px; }
+    .main { margin-left: 64px; }
+    .hero { padding: 24px; }
+    .hero-title { font-size: 28px; }
+    .player { grid-template-columns: auto 1fr auto; }
+    .ad-banner { left: 64px; }
+  }
+  @media (max-width: 600px) {
+    .content { padding: 16px; }
+    .topbar { padding: 12px 16px; }
+    .cards-grid { grid-template-columns: repeat(2, 1fr); }
+    .track-item { grid-template-columns: 26px 42px 1fr auto; }
+    .track-like { display: none; }
+    .ad-banner { padding: 10px 14px; flex-wrap: wrap; }
+    .ad-banner-text { font-size: 12px; }
+  }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
+  .empty-state svg { margin-bottom: 16px; opacity: 0.4; }
+  .empty-state h3 { font-size: 17px; color: var(--text2); margin-bottom: 8px; font-weight: 700; }
+  .empty-state p { font-size: 13.5px; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">ZABA <span>MUZYKA</span></div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen" class="hidden">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">Z</div>
+      <div class="auth-title">ZABA <span>MUZYKA</span></div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Войти</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Создать аккаунт</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="auth-form" id="loginForm">
+      <div class="auth-err" id="loginErr"></div>
+      <div class="auth-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="username" onkeydown="if(event.key==='Enter')doUserLogin()">
+      </div>
+      <div class="auth-group">
+        <label>Пароль</label>
+        <div class="auth-pw-wrap">
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doUserLogin()">
+          <button class="auth-show-pw" type="button" tabindex="-1" onclick="toggleAuthPw('loginPassword')">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="auth-submit-btn" id="loginBtn" onclick="doUserLogin()">Войти</button>
+      <div class="auth-guest-link">Нет аккаунта? <a onclick="switchAuthTab('register')">Создать</a></div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div class="auth-form hidden" id="registerForm">
+      <div class="auth-err" id="registerErr"></div>
+      <div class="auth-group">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="username">
+      </div>
+      <div class="auth-group">
+        <label>Пароль</label>
+        <div class="auth-pw-wrap">
+          <input type="password" id="regPassword" placeholder="Минимум 6 символов" autocomplete="new-password">
+          <button class="auth-show-pw" type="button" tabindex="-1" onclick="toggleAuthPw('regPassword')">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="auth-group">
+        <label>Повторите пароль</label>
+        <input type="password" id="regPassword2" placeholder="Повторите пароль" autocomplete="new-password">
+      </div>
+      <div class="auth-check-row">
+        <input type="checkbox" id="agreeTerms">
+        <label for="agreeTerms">Я согласен с <a href="terms.html" target="_blank">пользовательским соглашением</a> и <a href="privacy.html" target="_blank">политикой конфиденциальности</a></label>
+      </div>
+      <button class="auth-submit-btn" id="registerBtn" onclick="doUserRegister()">Создать аккаунт</button>
+      <div class="auth-guest-link">Уже есть аккаунт? <a onclick="switchAuthTab('login')">Войти</a></div>
+    </div>
+
+    <div class="auth-guest-link" style="margin-top:8px"><a onclick="continueAsGuest()">Продолжить без регистрации →</a></div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">Z</div>
+    <div class="logo-text">ZABA <span>MUZYKA</span></div>
+  </div>
+  <nav class="nav">
+    <a class="nav-item active" data-view="home" onclick="showView('home', this)">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Главная</span>
+    </a>
+    <a class="nav-item" data-view="search" onclick="showView('search', this)">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Поиск</span>
+    </a>
+    <a class="nav-item" data-view="wave" onclick="showView('wave', this)">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/></svg>
+      <span>Моя волна</span>
+    </a>
+    <a class="nav-item" data-view="library" onclick="showView('library', this)">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>Библиотека</span>
+    </a>
+    <a class="nav-item" data-view="liked" onclick="showView('liked', this)">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>Любимые</span>
+    </a>
+    <a class="nav-item" data-view="settings" onclick="showView('settings', this)">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Настройки</span>
+    </a>
+    <a class="nav-item" data-view="submit" onclick="showView('submit', this)">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+      <span>Предложить трек</span>
+    </a>
+    <a class="nav-item" data-view="bonus" onclick="showView('bonus', this)">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M9 13.7L7 22l5-3 5 3-2-8.3"/></svg>
+      <span>Бонусы и подписка</span>
+    </a>
+    <div class="nav-section-label">Плейлисты</div>
+    <div id="sidebarPlaylists"></div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="account-row" id="accountRow" onclick="showView('settings', document.querySelector('[data-view=settings]'))">
+      <div class="account-avatar" id="accountAvatar">Г</div>
+      <div class="account-info">
+        <div class="account-email" id="accountEmail">Гость</div>
+        <div class="account-sub" id="accountSub">Нажми, чтобы войти</div>
+      </div>
+    </div>
+    <a class="nav-item" href="admin.html" target="_blank" style="text-decoration:none;margin-top:4px">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <span>Админ панель</span>
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="search-wrap">
+      <span class="search-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <input type="text" id="searchInput" placeholder="Треки, артисты, альбомы..." oninput="handleSearch(this.value)">
+    </div>
+    <div class="topbar-right">
+      <div class="avatar" id="topAvatar" title="Аккаунт" onclick="showView('settings', document.querySelector('[data-view=settings]'))">Г</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- HOME -->
+    <div class="view active" id="view-home">
+      <div class="hero">
+        <div class="hero-label">★ ZABA MUZYKA</div>
+        <div class="hero-title">Слушай всё,<br>что хочешь</div>
+        <div class="hero-sub">Твоя музыка, всегда под рукой</div>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="playAll()"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Слушать всё</button>
+          <button class="btn-ghost" onclick="showView('wave', document.querySelector('[data-view=wave]'))"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"/></svg>Моя волна</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Все треки</div>
+          <div class="section-link" onclick="showView('library', document.querySelector('[data-view=library]'))">Смотреть все →</div>
+        </div>
+        <div class="tracks-list" id="homeTracksList">
+          <div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><h3>Треков пока нет</h3><p>Загрузи музыку через админ-панель</p></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><div class="section-title">Плейлисты</div></div>
+        <div class="cards-grid" id="playlistsGrid">
+          <div class="empty-state" style="grid-column:1/-1"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg><h3>Плейлистов нет</h3><p>Создай плейлист в админ-панели</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WAVE -->
+    <div class="view" id="view-wave">
+      <div class="section-header" style="margin-bottom:24px"><div class="section-title" style="font-size:26px;">Моя волна</div></div>
+      <div class="wave-card">
+        <div class="wave-header">
+          <div class="wave-icon">🌊</div>
+          <div class="wave-title">Бесконечный плейлист под настроение</div>
+        </div>
+        <div class="wave-filters" id="waveGenreFilters"></div>
+        <div class="wave-filters" id="waveMoodFilters">
+          <button class="wave-chip" data-mood="energetic" onclick="setWaveMood('energetic', this)"> Энергично</button>
+          <button class="wave-chip" data-mood="chill" onclick="setWaveMood('chill', this)">🌙 Спокойно</button>
+          <button class="wave-chip" data-mood="happy" onclick="setWaveMood('happy', this)">☀️ Радостно</button>
+          <button class="wave-chip" data-mood="sad" onclick="setWaveMood('sad', this)">🌧 Меланхолично</button>
+        </div>
+        <div class="wave-actions">
+          <button class="btn-primary" onclick="startWave()"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Включить волну</button>
+          <button class="btn-ghost" onclick="shuffleWave()" style="margin-left:10px"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/></svg>Встряхнуть волну</button>
+        </div>
+      </div>
+      <div class="tracks-list" id="waveTracksList"></div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="view" id="view-library">
+      <div class="section-header" style="margin-bottom:24px">
+        <div class="section-title" style="font-size:26px;">Библиотека</div>
+        <button class="btn-primary" onclick="playAll()"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Слушать всё</button>
+      </div>
+      <div class="tracks-list" id="libraryTracksList">
+        <div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><h3>Треков пока нет</h3><p>Загрузи музыку через админ-панель</p></div>
+      </div>
+    </div>
+
+    <!-- LIKED -->
+    <div class="view" id="view-liked">
+      <div class="section-header" style="margin-bottom:24px"><div class="section-title" style="font-size:26px;">Любимые треки</div></div>
+      <div class="tracks-list" id="likedTracksList">
+        <div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><h3>Нет любимых треков</h3><p>Нажми ♥ рядом с треком чтобы добавить</p></div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="view" id="view-search">
+      <div class="section-header" style="margin-bottom:24px"><div class="section-title" style="font-size:26px;">Поиск</div></div>
+      <div class="tracks-list" id="searchResults">
+        <div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><h3>Начни поиск</h3><p>Введи название трека или артиста</p></div>
+      </div>
+    </div>
+
+    <!-- PLAYLIST -->
+    <div class="view" id="view-playlist">
+      <div id="playlistHeader" style="margin-bottom:24px"></div>
+      <div class="tracks-list" id="playlistTracksList"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="view" id="view-settings">
+      <div class="section-header" style="margin-bottom:24px"><div class="section-title" style="font-size:26px;">Настройки</div></div>
+
+      <div id="settingsLoggedOut" class="hidden">
+        <div class="settings-panel">
+          <p style="color:var(--text2);font-size:14px;margin-bottom:16px">Войди или создай аккаунт, чтобы сохранять лайки, плейлисты и историю на любом устройстве.</p>
+          <button class="btn-primary" onclick="openAuthFromSettings()">Войти / Создать аккаунт</button>
+        </div>
+      </div>
+
+      <div id="settingsLoggedIn" class="hidden">
+        <div class="settings-panel">
+          <div class="settings-row">
+            <div>
+              <div class="settings-label" id="settingsEmail">—</div>
+              <div class="settings-sub">Ваш аккаунт</div>
+            </div>
+            <button class="btn-ghost" onclick="doUserLogout()">Выйти</button>
+          </div>
+        </div>
+
+        <div class="settings-panel">
+          <div class="settings-row">
+            <div>
+              <div class="settings-label">Качество звука</div>
+              <div class="settings-sub">Высокое качество, если доступно</div>
+            </div>
+            <div class="toggle"><input type="checkbox" id="setHQ" checked><label class="toggle-slider" for="setHQ"></label></div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label">Автовоспроизведение</div>
+              <div class="settings-sub">Продолжать играть похожую музыку</div>
+            </div>
+            <div class="toggle"><input type="checkbox" id="setAutoplay" checked><label class="toggle-slider" for="setAutoplay"></label></div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label">Показывать рекламу</div>
+              <div class="settings-sub">Баннеры и аудио-вставки между треками</div>
+            </div>
+            <div class="toggle"><input type="checkbox" id="setAds" checked onchange="toggleAdsSetting(this.checked)"><label class="toggle-slider" for="setAds"></label></div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-label">Нормализация громкости</div>
+              <div class="settings-sub">Одинаковая громкость для всех треков</div>
+            </div>
+            <div class="toggle"><input type="checkbox" id="setNorm"><label class="toggle-slider" for="setNorm"></label></div>
+          </div>
+        </div>
+
+        <div class="settings-panel">
+          <div style="font-size:13px;color:var(--text3);line-height:1.6">
+            <a href="terms.html" target="_blank" style="color:var(--yellow);text-decoration:none;font-weight:600">Пользовательское соглашение</a> ·
+            <a href="privacy.html" target="_blank" style="color:var(--yellow);text-decoration:none;font-weight:600">Политика конфиденциальности</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMIT TRACK (ПЕРЕДЕЛАННЫЙ - С ЗАГРУЗКОЙ ФАЙЛА) -->
+    <div class="view" id="view-submit">
+      <div class="section-header" style="margin-bottom:24px"><div class="section-title" style="font-size:26px;">Предложить трек</div></div>
+      <div class="submit-panel">
+        <p style="color:var(--text2);font-size:13.5px;margin-bottom:20px">Знаешь крутую песню, которой здесь не хватает? <b style="color:var(--text)">Загрузи файл напрямую</b> или пришли ссылку — мы проверим и добавим в библиотеку. За принятый трек — <b style="color:var(--yellow)">+50 бонусов</b> ✨</p>
+        
+        <div id="submitLoggedOutMsg" class="hidden" style="margin-bottom:16px;padding:14px;background:var(--surface2);border-radius:10px;font-size:13px;color:var(--text2)">
+          Чтобы отправить заявку и получить бонус за принятый трек, нужно <a onclick="openAuthFromSettings()" style="color:var(--yellow);cursor:pointer;font-weight:700">войти или зарегистрироваться</a>.
+        </div>
+
+        <!-- Tabs: файл / ссылка -->
+        <div class="auth-tabs" style="margin-bottom:20px">
+          <button class="auth-tab active" id="submitTabFile" type="button" onclick="switchSubmitTab('file')"> Загрузить файл</button>
+          <button class="auth-tab" id="submitTabLink" type="button" onclick="switchSubmitTab('link')">🔗 Вставить ссылку</button>
+        </div>
+
+        <div class="form-grp"><label>Название трека *</label><input type="text" id="subTrackTitle" placeholder="Название песни"></div>
+        <div class="form-grp"><label>Артист *</label><input type="text" id="subTrackArtist" placeholder="Имя исполнителя"></div>
+        <div class="form-grp">
+          <label>Жанр</label>
+          <select id="subTrackGenre">
+            <option value="">Выбрать жанр</option>
+            <option>Pop</option><option>Hip-Hop</option><option>R&B</option><option>Rock</option>
+            <option>Electronic</option><option>Jazz</option><option>Classical</option><option>Country</option>
+            <option>Indie</option><option>Metal</option><option>Reggae</option><option>Latin</option>
+            <option>Folk</option><option>Soul</option><option>Другое</option>
+          </select>
+        </div>
+
+        <!-- Блок загрузки файла -->
+        <div id="submitFileBlock">
+          <div class="form-grp">
+            <label>Аудиофайл *</label>
+            <div class="drop-area" id="submitDrop" onclick="document.getElementById('submitAudioInput').click()" ondrop="handleSubmitAudioDrop(event)" ondragover="handleSubmitDragOver(event)" ondragleave="handleSubmitDragLeave(event)">
+              <div class="drop-icon"></div>
+              <div class="drop-label">Нажми или перетащи MP3 / OGG / WAV / FLAC</div>
+              <div class="drop-sub">Максимум 100 MB. Файл загрузится в облако автоматически</div>
+            </div>
+            <input type="file" id="submitAudioInput" accept="audio/*" style="display:none" onchange="handleSubmitAudioFile(this.files[0])">
+            
+            <div id="submitAudioPreview" style="display:none" class="file-preview">
+              <div style="width:48px;height:48px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎵</div>
+              <div class="file-preview-info">
+                <div class="file-preview-name" id="submitAudioPreviewName">—</div>
+                <div class="file-preview-size" id="submitAudioPreviewSize">—</div>
+                <div class="file-preview-duration" id="submitAudioPreviewDuration"></div>
+              </div>
+              <button class="file-preview-remove" onclick="removeSubmitAudio()" title="Удалить файл">✕</button>
+            </div>
+            
+            <div id="submitUploadProgress" style="display:none" class="upload-progress">
+              <div class="progress-label"><span>Загрузка в облако...</span><span id="submitPct">0%</span></div>
+              <div class="progress-bar"><div class="progress-fill" id="submitProgressFill" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Блок ссылки -->
+        <div id="submitLinkBlock" class="hidden">
+          <div class="form-grp">
+            <label>Прямая ссылка на аудио *</label>
+            <input type="url" id="subTrackUrl" placeholder="https://example.com/song.mp3">
+            <small style="color:var(--text3);font-size:11px;display:block;margin-top:4px">Ссылка должна вести <b>напрямую на аудиофайл</b> (заканчиваться на .mp3, .ogg, .wav). Ссылки на YouTube/Spotify не подходят.</small>
+          </div>
+        </div>
+
+        <div class="form-grp"><label>Комментарий (необязательно)</label><textarea id="subTrackComment" placeholder="Почему стоит добавить этот трек?"></textarea></div>
+
+        <button class="btn-primary" onclick="submitTrackRequest()" id="submitTrackBtn" style="width:100%;justify-content:center;margin-top:8px">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          Отправить заявку
+        </button>
+      </div>
+    </div>
+
+    <!-- BONUS / SUBSCRIPTION -->
+    <div class="view" id="view-bonus">
+      <div class="section-header" style="margin-bottom:24px"><div class="section-title" style="font-size:26px;">Бонусы и подписка</div></div>
+
+      <div class="bonus-hero">
+        <div>
+          <div class="bonus-balance-label">Твой баланс</div>
+          <div class="bonus-balance-value" id="bonusBalance">0 ✨</div>
+          <div class="bonus-balance-sub">Зарабатывай бонусы и обменивай на подписку без ограничений и рекламы</div>
+        </div>
+        <div class="sub-status-badge inactive" id="subStatusBadge">Нет подписки</div>
+      </div>
+
+      <div class="section-header" style="margin-bottom:14px"><div class="section-title" style="font-size:18px;">Задания</div></div>
+      <div class="tasks-grid">
+        <div class="task-card">
+          <div class="task-icon">📅</div>
+          <div class="task-name">Заходи каждый день</div>
+          <div class="task-desc">Получай бонус за ежедневный вход. Текущий streak: <b id="streakCount">0</b> дн.</div>
+          <div class="task-reward">+10 ✨ в день</div>
+          <button class="task-btn done" id="dailyTaskBtn">Засчитано сегодня</button>
+        </div>
+        <div class="task-card">
+          <div class="task-icon">🎧</div>
+          <div class="task-name">Прослушай 10 треков</div>
+          <div class="task-desc">Прогресс: <b id="listenProgress">0/10</b> треков сегодня</div>
+          <div class="task-reward">+20 ✨</div>
+          <button class="task-btn" id="listenTaskBtn" disabled>В процессе</button>
+        </div>
+        <div class="task-card">
+          <div class="task-icon">🎵</div>
+          <div class="task-name">Предложи трек</div>
+          <div class="task-desc">Загрузи файл или пришли ссылку — за каждый одобренный трек бонус на счёт</div>
+          <div class="task-reward">+50 ✨ за принятый трек</div>
+          <button class="task-btn" onclick="showView('submit', document.querySelector('[data-view=submit]'))">Предложить</button>
+        </div>
+      </div>
+
+      <div class="section-header" style="margin-bottom:14px"><div class="section-title" style="font-size:18px;">Подписка ZABA MUZYKA+</div></div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div class="plan-card">
+          <div class="plan-name">Бесплатно</div>
+          <div class="plan-price">0 ₽</div>
+          <ul class="plan-features">
+            <li><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Доступ ко всей музыке</li>
+            <li><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>До 3 рекламных пауз в день</li>
+            <li><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>«Моя волна» и плейлисты</li>
+          </ul>
+        </div>
+        <div class="plan-card featured">
+          <div class="plan-name">ZABA MUZYKA+</div>
+          <div class="plan-price">500 ✨ <span>/ месяц бонусами</span></div>
+          <ul class="plan-features">
+            <li><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Без рекламы вообще</li>
+            <li><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Безлимитные пропуски треков</li>
+            <li><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Приоритет рассмотрения предложенных треков</li>
+          </ul>
+          <button class="btn-primary" style="width:100%;justify-content:center" onclick="activateSubscription()">Активировать за 500 ✨</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- AD BANNER -->
+<div class="ad-banner hidden" id="adBanner">
+  <div class="ad-banner-icons">🐸✨🎧</div>
+  <div class="ad-banner-text">Больше близких — больше плюсов. <b>Поделись доступом к музыке</b> с ещё 2 близкими</div>
+  <button class="ad-banner-btn" onclick="showToast('✨ Демо-функция')">Добавить за 250 ₽</button>
+  <button class="ad-banner-btn2" onclick="dismissAdBanner()">В другой раз</button>
+  <button class="ad-banner-close" onclick="dismissAdBanner()">✕</button>
+</div>
+
+<!-- AD AUDIO OVERLAY -->
+<div class="ad-audio-overlay hidden" id="adAudioOverlay">
+  <span class="ad-audio-tag">Реклама</span>
+  <span class="ad-audio-text" id="adAudioText">Слушайте без рекламы с ZABA MUZYKA+</span>
+  <span class="ad-audio-timer" id="adAudioTimer">0:05</span>
+</div>
+
+<!-- PLAYER -->
+<div class="player" id="player">
+  <div class="player-track">
+    <div class="player-cover" id="playerCover">🎵</div>
+    <div class="player-info">
+      <div class="player-name" id="playerName">Выбери трек</div>
+      <div class="player-artist" id="playerArtist">—</div>
+    </div>
+    <button class="player-heart" id="playerHeart" onclick="toggleLikeCurrent()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+  </div>
+
+  <div class="player-center">
+    <div class="player-controls">
+      <button class="ctrl-btn" id="shuffleBtn" onclick="toggleShuffle()" title="Перемешать">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+      </button>
+      <button class="ctrl-btn" onclick="playPrev()" title="Назад">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="play-btn" id="mainPlayBtn" onclick="togglePlay()">
+        <svg id="playIcon" width="18" height="18" fill="#0c0c0c" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <svg id="pauseIcon" width="18" height="18" fill="#0c0c0c" viewBox="0 0 24 24" class="hidden"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button class="ctrl-btn" onclick="playNext()" title="Вперёд">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="ctrl-btn" id="repeatBtn" onclick="toggleRepeat()" title="Повтор">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap">
+      <span class="time" id="currentTime">0:00</span>
+      <div class="progress-bar" id="progressBar" onclick="seekTo(event)"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <span class="time" id="totalTime">0:00</span>
+    </div>
+  </div>
+
+  <div class="player-right">
+    <div class="eq-bars" id="eqBars" style="opacity:0"><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div></div>
+    <div class="volume-wrap">
+      <button class="ctrl-btn" onclick="toggleMute()">
+        <svg id="volIcon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
+      <div class="volume-bar" onclick="setVolume(event)"><div class="volume-fill" id="volumeFill"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toastText"></span></div>
+
+<audio id="audioEl"></audio>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+// ===== FIREBASE CONFIG =====
+const firebaseConfig = {
+  apiKey: "AIzaSyC2YcDyrJCthXJ7bRD6AuPcijUwcTawlE4",
+  authDomain: "zaba-muzyka.firebaseapp.com",
+  projectId: "zaba-muzyka",
+  storageBucket: "zaba-muzyka.firebasestorage.app",
+  messagingSenderId: "729409203231",
+  appId: "1:729409203231:web:5b1a008d34f4ee2353392a"
+};
+
+// ===== CLOUDINARY CONFIG =====
+const CLOUDINARY_CLOUD_NAME = 'dd8oupu00'; // ✅ ИСПРАВЛЕНО
+const CLOUDINARY_UPLOAD_PRESET = 'zm_unsigned';
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// ===== STATE =====
+let allTracks = [];
+let allPlaylists = [];
+let queue = [];
+let currentIdx = -1;
+let isPlaying = false;
+let isShuffle = false;
+let isRepeat = false;
+let isMuted = false;
+let volume = 0.8;
+let likedIds = JSON.parse(localStorage.getItem('zm_liked') || '[]');
+let currentUser = null;
+let isGuest = localStorage.getItem('zm_guest') === '1';
+let adsEnabled = localStorage.getItem('zm_ads_enabled') !== '0';
+let tracksSincePlay = 0;
+let waveGenre = '';
+let waveMood = '';
+let waveQueue = [];
+
+// Состояние для загрузки файла в разделе "Предложить трек"
+let submitAudioFile = null;
+let submitAudioDuration = '';
+
+const audio = document.getElementById('audioEl');
+
+// ===== CLOUDINARY UPLOAD =====
+async function uploadAudioToCloudinary(file, progressCb) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  formData.append('resource_type', 'video');
+  
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable && progressCb) {
+        progressCb(Math.round((e.loaded / e.total) * 100));
+      }
+    });
+    xhr.addEventListener('load', () => {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (data.secure_url) {
+          resolve({
+            url: data.secure_url,
+            duration: Math.round(data.duration || 0),
+            format: data.format
+          });
+        } else {
+          reject(new Error(data.error?.message || 'Ошибка загрузки'));
+        }
+      } catch (e) {
+        reject(new Error('Ошибка парсинга ответа'));
+      }
+    });
+    xhr.addEventListener('error', () => reject(new Error('Ошибка сети')));
+    xhr.addEventListener('abort', () => reject(new Error('Загрузка отменена')));
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`);
+    xhr.send(formData);
+  });
+}
+
+// ===== AUTH STATE =====
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    isGuest = false;
+    localStorage.removeItem('zm_guest');
+    document.getElementById('authScreen').classList.add('hidden');
+    updateAccountUI();
+    await loadUserData();
+    checkDailyStreak();
+    renderBonusUI();
+    document.getElementById('submitLoggedOutMsg').classList.add('hidden');
+  } else {
+    currentUser = null;
+    if (isGuest) {
+      document.getElementById('authScreen').classList.add('hidden');
+    } else {
+      document.getElementById('authScreen').classList.remove('hidden');
+    }
+    updateAccountUI();
+    renderBonusUI();
+    document.getElementById('submitLoggedOutMsg').classList.remove('hidden');
+  }
+});
+
+function updateAccountUI() {
+  const email = currentUser?.email || '';
+  const initial = email ? email[0].toUpperCase() : 'Г';
+  document.getElementById('accountAvatar').textContent = initial;
+  document.getElementById('topAvatar').textContent = initial;
+  document.getElementById('accountEmail').textContent = email || 'Гость';
+  document.getElementById('accountSub').textContent = email ? 'Мой аккаунт' : 'Нажми, чтобы войти';
+
+  if (currentUser) {
+    document.getElementById('settingsLoggedOut').classList.add('hidden');
+    document.getElementById('settingsLoggedIn').classList.remove('hidden');
+    document.getElementById('settingsEmail').textContent = email;
+  } else {
+    document.getElementById('settingsLoggedOut').classList.remove('hidden');
+    document.getElementById('settingsLoggedIn').classList.add('hidden');
+  }
+}
+
+async function loadUserData() {
+  if (!currentUser) return;
+  try {
+    const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      if (Array.isArray(data.likedIds)) {
+        likedIds = data.likedIds;
+        localStorage.setItem('zm_liked', JSON.stringify(likedIds));
+        renderAllTrackLists();
+      }
+      if (typeof data.bonusBalance === 'number') {
+        const localState = getBonusState();
+        localState.balance = data.bonusBalance;
+        saveBonusState(localState);
+      }
+    } else {
+      await setDoc(doc(db, 'users', currentUser.uid), { email: currentUser.email, likedIds: likedIds, bonusBalance: 0, createdAt: Date.now() });
+    }
+  } catch (e) { console.warn('loadUserData', e); }
+}
+
+async function saveUserLikes() {
+  if (!currentUser) return;
+  try { await updateDoc(doc(db, 'users', currentUser.uid), { likedIds }); }
+  catch (e) {
+    try { await setDoc(doc(db, 'users', currentUser.uid), { email: currentUser.email, likedIds, createdAt: Date.now() }); }
+    catch (e2) { console.warn('saveUserLikes', e2); }
+  }
+}
+
+async function pushBonusToFirestore() {
+  if (!currentUser) return;
+  try {
+    const s = getBonusState();
+    await updateDoc(doc(db, 'users', currentUser.uid), { bonusBalance: s.balance || 0 });
+  } catch (e) { console.warn('pushBonusToFirestore', e); }
+}
+
+// ===== AUTH UI =====
+window.switchAuthTab = function(tab) {
+  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('registerForm').classList.toggle('hidden', tab !== 'register');
+};
+
+window.toggleAuthPw = function(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+};
+
+window.continueAsGuest = function() {
+  isGuest = true;
+  localStorage.setItem('zm_guest', '1');
+  document.getElementById('authScreen').classList.add('hidden');
+};
+
+window.openAuthFromSettings = function() {
+  isGuest = false;
+  localStorage.removeItem('zm_guest');
+  document.getElementById('authScreen').classList.remove('hidden');
+};
+
+window.doUserLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.classList.remove('show');
+  if (!email || !password) { errEl.textContent = 'Заполни email и пароль'; errEl.classList.add('show'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Входим...';
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    let msg = 'Ошибка входа';
+    if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password') msg = 'Неверный email или пароль';
+    if (e.code === 'auth/user-not-found') msg = 'Аккаунт не найден';
+    if (e.code === 'auth/invalid-email') msg = 'Некорректный email';
+    if (e.code === 'auth/too-many-requests') msg = 'Слишком много попыток, подожди';
+    errEl.textContent = msg; errEl.classList.add('show');
+  }
+  btn.disabled = false; btn.textContent = 'Войти';
+};
+
+window.doUserRegister = async function() {
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const password2 = document.getElementById('regPassword2').value;
+  const agree = document.getElementById('agreeTerms').checked;
+  const errEl = document.getElementById('registerErr');
+  errEl.classList.remove('show');
+  if (!email || !password || !password2) { errEl.textContent = 'Заполни все поля'; errEl.classList.add('show'); return; }
+  if (password.length < 6) { errEl.textContent = 'Пароль минимум 6 символов'; errEl.classList.add('show'); return; }
+  if (password !== password2) { errEl.textContent = 'Пароли не совпадают'; errEl.classList.add('show'); return; }
+  if (!agree) { errEl.textContent = 'Нужно принять соглашение и политику конфиденциальности'; errEl.classList.add('show'); return; }
+  const btn = document.getElementById('registerBtn');
+  btn.disabled = true; btn.textContent = 'Создаём...';
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await setDoc(doc(db, 'users', cred.user.uid), { email, likedIds: [], createdAt: Date.now(), agreedTermsAt: Date.now() });
+    showToast('✅ Аккаунт создан!');
+  } catch (e) {
+    let msg = 'Ошибка регистрации';
+    if (e.code === 'auth/email-already-in-use') msg = 'Этот email уже зарегистрирован';
+    if (e.code === 'auth/invalid-email') msg = 'Некорректный email';
+    if (e.code === 'auth/weak-password') msg = 'Слишком простой пароль';
+    errEl.textContent = msg; errEl.classList.add('show');
+  }
+  btn.disabled = false; btn.textContent = 'Создать аккаунт';
+};
+
+window.doUserLogout = async function() {
+  if (!confirm('Выйти из аккаунта?')) return;
+  await signOut(auth);
+  isGuest = true;
+  localStorage.setItem('zm_guest', '1');
+  showToast('Вы вышли из аккаунта');
+};
+
+// ===== ADS SETTING =====
+window.toggleAdsSetting = function(checked) {
+  adsEnabled = checked;
+  localStorage.setItem('zm_ads_enabled', checked ? '1' : '0');
+  if (!checked) { document.getElementById('adBanner').classList.add('hidden'); }
+};
+document.getElementById('setAds').checked = adsEnabled;
+
+// ===== FIREBASE DATA =====
+onSnapshot(collection(db, 'tracks'), snap => {
+  allTracks = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  queue = [...allTracks];
+  renderAllTrackLists();
+  renderWaveFilters();
+});
+
+onSnapshot(collection(db, 'playlists'), snap => {
+  allPlaylists = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderPlaylists();
+  renderSidebarPlaylists();
+});
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+function renderTrackItem(track, idx, listId) {
+  const liked = likedIds.includes(track.id);
+  const isNowPlaying = currentIdx !== -1 && queue[currentIdx]?.id === track.id && isPlaying;
+  return `
+    <div class="track-item ${isNowPlaying ? 'playing' : ''}" data-id="${track.id}" onclick="playTrack(${idx}, '${listId}')">
+      <div class="track-num">${isNowPlaying ? `<div class="eq-bars" style="opacity:1;margin:auto"><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div></div>` : idx + 1}</div>
+      <div class="track-cover">${track.cover ? `<img src="${track.cover}" alt="" onerror="this.style.display='none'">` : '🎵'}</div>
+      <div class="track-info">
+        <div class="track-name">${escapeHtml(track.title || 'Без названия')}</div>
+        <div class="track-artist">${escapeHtml(track.artist || 'Неизвестный артист')}</div>
+      </div>
+      <button class="track-like ${liked ? 'liked' : ''}" onclick="toggleLike(event, '${track.id}')">
+        <svg width="16" height="16" fill="${liked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      <div class="track-duration">${track.duration || '–'}</div>
+    </div>`;
+}
+
+function renderAllTrackLists() {
+  const homeEl = document.getElementById('homeTracksList');
+  const libEl = document.getElementById('libraryTracksList');
+  const likedEl = document.getElementById('likedTracksList');
+  const emptyMain = '<div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><h3>Треков пока нет</h3><p>Загрузи музыку через админ-панель</p></div>';
+
+  homeEl.innerHTML = allTracks.length ? allTracks.slice(0, 20).map((t, i) => renderTrackItem(t, i, 'all')).join('') : emptyMain;
+  libEl.innerHTML = allTracks.length ? allTracks.map((t, i) => renderTrackItem(t, i, 'all')).join('') : emptyMain;
+
+  const likedTracks = allTracks.filter(t => likedIds.includes(t.id));
+  likedEl.innerHTML = likedTracks.length
+    ? likedTracks.map((t, i) => renderTrackItem(t, i, 'liked')).join('')
+    : '<div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><h3>Нет любимых треков</h3><p>Нажми ♥ рядом с треком</p></div>';
+}
+
+function renderPlaylists() {
+  const grid = document.getElementById('playlistsGrid');
+  if (!allPlaylists.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><h3>Плейлистов нет</h3><p>Создай плейлист в админ-панели</p></div>'; return; }
+  grid.innerHTML = allPlaylists.map(pl => `
+    <div class="card" onclick="openPlaylist('${pl.id}')">
+      <div class="card-cover">
+        ${pl.cover ? `<img src="${pl.cover}" alt="">` : '<span class="card-cover-placeholder">🎵</span>'}
+        <div class="card-play-btn"><svg width="16" height="16" fill="#0c0c0c" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      </div>
+      <div class="card-title">${escapeHtml(pl.name || 'Плейлист')}</div>
+      <div class="card-meta">${(pl.tracks || []).length} треков</div>
+    </div>`).join('');
+}
+
+function renderSidebarPlaylists() {
+  const el = document.getElementById('sidebarPlaylists');
+  el.innerHTML = allPlaylists.map(pl => `
+    <div class="playlist-item" onclick="openPlaylist('${pl.id}')"><div class="playlist-dot"></div><span>${escapeHtml(pl.name || 'Плейлист')}</span></div>`).join('');
+}
+
+// ===== WAVE =====
+function renderWaveFilters() {
+  const genres = [...new Set(allTracks.map(t => t.genre).filter(Boolean))];
+  const el = document.getElementById('waveGenreFilters');
+  if (!genres.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `<button class="wave-chip ${waveGenre === '' ? 'active' : ''}" onclick="setWaveGenre('', this)">Все жанры</button>` +
+    genres.map(g => `<button class="wave-chip ${waveGenre === g ? 'active' : ''}" onclick="setWaveGenre('${g}', this)">${escapeHtml(g)}</button>`).join('');
+}
+window.setWaveGenre = function(g, el) {
+  waveGenre = g;
+  document.querySelectorAll('#waveGenreFilters .wave-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+};
+window.setWaveMood = function(m, el) {
+  const already = waveMood === m;
+  document.querySelectorAll('#waveMoodFilters .wave-chip').forEach(c => c.classList.remove('active'));
+  waveMood = already ? '' : m;
+  if (!already) el.classList.add('active');
+};
+function buildWaveQueue() {
+  let pool = [...allTracks];
+  if (waveGenre) pool = pool.filter(t => t.genre === waveGenre);
+  if (waveMood) {
+    const moodWords = {
+      energetic: ['энерг', 'бодр', 'танц', 'dance', 'gym'],
+      chill: ['спокой', 'релакс', 'chill', 'lo-fi', 'lofi'],
+      happy: ['радост', 'позитив', 'happy', 'весел'],
+      sad: ['меланхол', 'грустн', 'sad', 'печал']
+    };
+    const words = moodWords[waveMood] || [];
+    const filtered = pool.filter(t => {
+      const text = ((t.description || '') + ' ' + (t.genre || '')).toLowerCase();
+      return words.some(w => text.includes(w));
+    });
+    if (filtered.length) pool = filtered;
+  }
+  if (!pool.length) pool = [...allTracks];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool;
+}
+window.startWave = function() {
+  waveQueue = buildWaveQueue();
+  if (!waveQueue.length) { showToast('Сначала загрузи треки через админ-панель'); return; }
+  renderWaveList();
+  queue = waveQueue;
+  currentIdx = 0;
+  loadAndPlay();
+  showToast('🌊 Волна включена');
+};
+window.shuffleWave = function() {
+  waveQueue = buildWaveQueue();
+  renderWaveList();
+  showToast('🔀 Волна перемешана');
+};
+function renderWaveList() {
+  const el = document.getElementById('waveTracksList');
+  if (!waveQueue.length) { el.innerHTML = ''; return; }
+  el.innerHTML = waveQueue.map((t, i) => renderTrackItem(t, i, 'wave')).join('');
+}
+
+// ===== PLAY LOGIC =====
+window.playTrack = function(idx, listId) {
+  if (listId === 'search') { playTrackSearch(idx); return; }
+  if (listId === 'wave') { queue = waveQueue; currentIdx = idx; loadAndPlay(); return; }
+  if (listId === 'liked') queue = allTracks.filter(t => likedIds.includes(t.id));
+  else queue = [...allTracks];
+  currentIdx = idx;
+  loadAndPlay();
+};
+
+function playTrackSearch(idx) {
+  const ql = document.getElementById('searchInput').value.toLowerCase();
+  queue = allTracks.filter(t => (t.title||'').toLowerCase().includes(ql) || (t.artist||'').toLowerCase().includes(ql) || (t.album||'').toLowerCase().includes(ql));
+  currentIdx = idx;
+  loadAndPlay();
+}
+
+function loadAndPlay() {
+  const track = queue[currentIdx];
+  if (!track) return;
+  if (!track.url) {
+    showToast('⚠️ У этого трека нет ссылки на аудио');
+    return;
+  }
+  audio.src = track.url;
+  audio.volume = volume;
+  updatePlayerUI(track, true);
+  renderAllTrackLists();
+  if (queue === waveQueue) renderWaveList();
+
+  audio.play().then(() => {
+    isPlaying = true;
+    document.getElementById('playIcon').classList.add('hidden');
+    document.getElementById('pauseIcon').classList.remove('hidden');
+    document.getElementById('eqBars').style.opacity = '1';
+    renderAllTrackLists();
+    if (queue === waveQueue) renderWaveList();
+  }).catch(err => {
+    isPlaying = false;
+    document.getElementById('playIcon').classList.remove('hidden');
+    document.getElementById('pauseIcon').classList.add('hidden');
+    document.getElementById('eqBars').style.opacity = '0';
+    showToast('⚠️ Не удалось воспроизвести трек');
+    console.warn('Playback error:', err);
+  });
+
+  tracksSincePlay++;
+  trackListenForBonus();
+  maybeShowAdBanner();
+}
+
+audio.addEventListener('error', () => {
+  isPlaying = false;
+  document.getElementById('playIcon').classList.remove('hidden');
+  document.getElementById('pauseIcon').classList.add('hidden');
+  document.getElementById('eqBars').style.opacity = '0';
+  document.getElementById('currentTime').textContent = '0:00';
+  document.getElementById('totalTime').textContent = '0:00';
+  document.getElementById('progressFill').style.width = '0%';
+  showToast('⚠️ Ошибка воспроизведения — ссылка недоступна');
+});
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function maybeShowAdBanner() {
+  if (!adsEnabled) return;
+  if (hasActiveSubscription()) return;
+  const key = 'zm_ads_shown_' + todayKey();
+  let shown = parseInt(localStorage.getItem(key) || '0', 10);
+  if (shown >= 3) return;
+  if (tracksSincePlay % 4 !== 0) return;
+  shown++;
+  localStorage.setItem(key, String(shown));
+  document.getElementById('adBanner').classList.remove('hidden');
+}
+window.dismissAdBanner = function() {
+  document.getElementById('adBanner').classList.add('hidden');
+};
+
+// ===== BONUS / SUBSCRIPTION =====
+function getBonusState() {
+  return JSON.parse(localStorage.getItem('zm_bonus_state') || '{"balance":0,"streak":0,"lastLogin":"","listenedToday":0,"listenedDate":"","listenBonusGiven":false,"subscriptionUntil":0}');
+}
+function saveBonusState(state) {
+  localStorage.setItem('zm_bonus_state', JSON.stringify(state));
+}
+function hasActiveSubscription() {
+  const s = getBonusState();
+  return s.subscriptionUntil && s.subscriptionUntil > Date.now();
+}
+function addBonus(amount, reason) {
+  const s = getBonusState();
+  s.balance = (s.balance || 0) + amount;
+  saveBonusState(s);
+  renderBonusUI();
+  pushBonusToFirestore();
+  if (reason) showToast(`✨ +${amount} бонусов: ${reason}`);
+}
+function trackListenForBonus() {
+  const s = getBonusState();
+  const today = todayKey();
+  if (s.listenedDate !== today) { s.listenedDate = today; s.listenedToday = 0; s.listenBonusGiven = false; }
+  s.listenedToday = (s.listenedToday || 0) + 1;
+  let bonusJustGiven = false;
+  if (s.listenedToday >= 10 && !s.listenBonusGiven) {
+    s.listenBonusGiven = true;
+    s.balance = (s.balance || 0) + 20;
+    bonusJustGiven = true;
+    showToast('✨ +20 бонусов: прослушано 10 треков!');
+  }
+  saveBonusState(s);
+  renderBonusUI();
+  if (bonusJustGiven) pushBonusToFirestore();
+}
+function checkDailyStreak() {
+  const s = getBonusState();
+  const today = todayKey();
+  if (s.lastLogin === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  s.streak = (s.lastLogin === yesterday) ? (s.streak || 0) + 1 : 1;
+  s.lastLogin = today;
+  s.balance = (s.balance || 0) + 10;
+  saveBonusState(s);
+  pushBonusToFirestore();
+  setTimeout(() => showToast(`✨ +10 бонусов за вход! Streak: ${s.streak} дн.`), 1200);
+}
+function renderBonusUI() {
+  const s = getBonusState();
+  const balEl = document.getElementById('bonusBalance');
+  if (balEl) balEl.textContent = `${s.balance || 0} ✨`;
+  const streakEl = document.getElementById('streakCount');
+  if (streakEl) streakEl.textContent = s.streak || 0;
+  const listenEl = document.getElementById('listenProgress');
+  if (listenEl) listenEl.textContent = `${Math.min(s.listenedToday || 0, 10)}/10`;
+  const listenBtn = document.getElementById('listenTaskBtn');
+  if (listenBtn) {
+    if ((s.listenedToday || 0) >= 10) { listenBtn.textContent = 'Выполнено сегодня'; listenBtn.classList.add('done'); }
+    else { listenBtn.textContent = 'В процессе'; listenBtn.classList.remove('done'); }
+  }
+  const badge = document.getElementById('subStatusBadge');
+  if (badge) {
+    if (hasActiveSubscription()) {
+      const daysLeft = Math.ceil((s.subscriptionUntil - Date.now()) / 86400000);
+      badge.textContent = `Подписка активна (${daysLeft} дн.)`;
+      badge.classList.remove('inactive');
+    } else {
+      badge.textContent = 'Нет подписки';
+      badge.classList.add('inactive');
+    }
+  }
+}
+window.activateSubscription = function() {
+  const s = getBonusState();
+  if ((s.balance || 0) < 500) { showToast('❌ Недостаточно бонусов. Нужно 500 ✨'); return; }
+  s.balance -= 500;
+  s.subscriptionUntil = Date.now() + 30 * 86400000;
+  saveBonusState(s);
+  renderBonusUI();
+  pushBonusToFirestore();
+  showToast('🎉 Подписка ZABA MUZYKA+ активирована на 30 дней!');
+};
+
+// ===== SUBMIT TRACK (ПЕРЕДЕЛАННЫЙ - С ЗАГРУЗКОЙ ФАЙЛА) =====
+
+// Переключение табов файл/ссылка
+window.switchSubmitTab = function(mode) {
+  document.getElementById('submitTabFile').classList.toggle('active', mode === 'file');
+  document.getElementById('submitTabLink').classList.toggle('active', mode === 'link');
+  document.getElementById('submitFileBlock').classList.toggle('hidden', mode !== 'file');
+  document.getElementById('submitLinkBlock').classList.toggle('hidden', mode !== 'link');
+};
+
+// Drag & Drop
+window.handleSubmitDragOver = function(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('dragover');
+};
+window.handleSubmitDragLeave = function(e) {
+  e.currentTarget.classList.remove('dragover');
+};
+window.handleSubmitAudioDrop = function(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleSubmitAudioFile(file);
+};
+
+// Обработка выбранного файла с ПРОВЕРКОЙ
+window.handleSubmitAudioFile = function(file) {
+  if (!file) return;
+  
+  // Проверка 1: только аудио
+  if (!file.type.startsWith('audio/') && !file.name.match(/\.(mp3|ogg|wav|flac|aac|m4a|wma)$/i)) {
+    showToast(' Это не аудиофайл. Выбери MP3, OGG, WAV или FLAC');
+    return;
+  }
+  
+  // Проверка 2: размер до 100MB
+  const maxSize = 100 * 1024 * 1024;
+  if (file.size > maxSize) {
+    showToast(`❌ Файл слишком большой (${(file.size/1024/1024).toFixed(1)} MB). Максимум 100 MB`);
+    return;
+  }
+  
+  // Проверка 3: размер не 0
+  if (file.size < 1000) {
+    showToast(' Файл повреждён или пуст');
+    return;
+  }
+  
+  submitAudioFile = file;
+  
+  // Показываем превью
+  document.getElementById('submitAudioPreview').style.display = 'flex';
+  document.getElementById('submitAudioPreviewName').textContent = file.name;
+  document.getElementById('submitAudioPreviewSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+  document.getElementById('submitAudioPreviewDuration').textContent = '⏳ Определяю длительность...';
+  
+  // Определяем длительность
+  try {
+    const tempAudio = new Audio();
+    const objectUrl = URL.createObjectURL(file);
+    tempAudio.src = objectUrl;
+    tempAudio.addEventListener('loadedmetadata', () => {
+      const m = Math.floor(tempAudio.duration / 60);
+      const s = Math.floor(tempAudio.duration % 60).toString().padStart(2, '0');
+      submitAudioDuration = `${m}:${s}`;
+      document.getElementById('submitAudioPreviewDuration').textContent = `⏱ Длительность: ${m}:${s}`;
+      URL.revokeObjectURL(objectUrl);
+    });
+    tempAudio.addEventListener('error', () => {
+      document.getElementById('submitAudioPreviewDuration').textContent = '⚠️ Не удалось определить длительность';
+      submitAudioDuration = '';
+    });
+  } catch (e) {
+    document.getElementById('submitAudioPreviewDuration').textContent = '';
+    submitAudioDuration = '';
+  }
+};
+
+window.removeSubmitAudio = function() {
+  submitAudioFile = null;
+  submitAudioDuration = '';
+  document.getElementById('submitAudioPreview').style.display = 'none';
+  document.getElementById('submitUploadProgress').style.display = 'none';
+  document.getElementById('submitAudioInput').value = '';
+};
+
+// Отправка заявки (с загрузкой файла если нужно)
+window.submitTrackRequest = async function() {
+  const title = document.getElementById('subTrackTitle').value.trim();
+  const artist = document.getElementById('subTrackArtist').value.trim();
+  const genre = document.getElementById('subTrackGenre').value;
+  const comment = document.getElementById('subTrackComment').value.trim();
+  const usingFileMode = !document.getElementById('submitFileBlock').classList.contains('hidden');
+  const manualUrl = document.getElementById('subTrackUrl').value.trim();
+  
+  if (!title || !artist) {
+    showToast('❌ Заполни название и артиста');
+    return;
+  }
+  
+  if (!currentUser) {
+    showToast('❌ Нужно войти, чтобы отправить заявку');
+    return;
+  }
+  
+  // Проверка: файл ИЛИ ссылка должны быть
+  if (usingFileMode && !submitAudioFile) {
+    showToast('❌ Выбери аудиофайл');
+    return;
+  }
+  if (!usingFileMode && !manualUrl) {
+    showToast(' Вставь ссылку на аудио');
+    return;
+  }
+  
+  const btn = document.getElementById('submitTrackBtn');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Отправка...';
+  
+  try {
+    let audioUrl = manualUrl;
+    let duration = submitAudioDuration || '';
+    let source = 'link';
+    
+    // Если выбран файл — загружаем в Cloudinary
+    if (usingFileMode && submitAudioFile) {
+      document.getElementById('submitUploadProgress').style.display = 'block';
+      const result = await uploadAudioToCloudinary(submitAudioFile, pct => {
+        document.getElementById('submitProgressFill').style.width = pct + '%';
+        document.getElementById('submitPct').textContent = pct + '%';
+      });
+      audioUrl = result.url;
+      if (result.duration && !duration) {
+        const m = Math.floor(result.duration / 60);
+        const s = Math.floor(result.duration % 60).toString().padStart(2, '0');
+        duration = `${m}:${s}`;
+      }
+      source = 'file';
+      document.getElementById('submitUploadProgress').style.display = 'none';
+    }
+    
+    // Отправляем заявку в Firestore
+    await addDoc(collection(db, 'submissions'), {
+      title,
+      artist,
+      url: audioUrl,
+      genre,
+      comment,
+      duration,
+      source, // 'file' или 'link'
+      submittedBy: currentUser.email,
+      submittedByUid: currentUser.uid,
+      status: 'pending',
+      createdAt: serverTimestamp()
+    });
+    
+    showToast('✅ Заявка отправлена! Спасибо 🎵');
+    
+    // Очистка формы
+    document.getElementById('subTrackTitle').value = '';
+    document.getElementById('subTrackArtist').value = '';
+    document.getElementById('subTrackGenre').selectedIndex = 0;
+    document.getElementById('subTrackUrl').value = '';
+    document.getElementById('subTrackComment').value = '';
+    removeSubmitAudio();
+    
+  } catch (e) {
+    showToast('❌ Ошибка: ' + e.message);
+    document.getElementById('submitUploadProgress').style.display = 'none';
+  }
+  
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg> Отправить заявку';
+};
+
+function updatePlayerUI(track, loading) {
+  document.getElementById('playerName').textContent = track.title || 'Без названия';
+  document.getElementById('playerArtist').textContent = track.artist || '—';
+  document.getElementById('playerCover').innerHTML = track.cover ? `<img src="${track.cover}" alt="" onerror="this.style.display='none'">` : '🎵';
+  if (!loading) {
+    document.getElementById('playIcon').classList.add('hidden');
+    document.getElementById('pauseIcon').classList.remove('hidden');
+    document.getElementById('eqBars').style.opacity = '1';
+  }
+  const liked = likedIds.includes(track.id);
+  const heart = document.getElementById('playerHeart');
+  heart.classList.toggle('liked', liked);
+  heart.querySelector('svg').setAttribute('fill', liked ? 'currentColor' : 'none');
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: track.title || 'Без названия', artist: track.artist || '—',
+      artwork: track.cover ? [{ src: track.cover }] : []
+    });
+  }
+}
+
+window.togglePlay = function() {
+  if (!audio.src) return;
+  if (isPlaying) { audio.pause(); isPlaying = false; } else { audio.play(); isPlaying = true; }
+  document.getElementById('playIcon').classList.toggle('hidden', isPlaying);
+  document.getElementById('pauseIcon').classList.toggle('hidden', !isPlaying);
+  document.getElementById('eqBars').style.opacity = isPlaying ? '1' : '0';
+};
+
+window.playNext = function() {
+  if (!queue.length) return;
+  currentIdx = isShuffle ? Math.floor(Math.random() * queue.length) : (currentIdx + 1) % queue.length;
+  loadAndPlay();
+};
+window.playPrev = function() {
+  if (!queue.length) return;
+  if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+  currentIdx = (currentIdx - 1 + queue.length) % queue.length;
+  loadAndPlay();
+};
+window.playAll = function() {
+  if (!allTracks.length) return;
+  queue = [...allTracks]; currentIdx = 0; loadAndPlay();
+};
+audio.addEventListener('ended', () => { if (isRepeat) { audio.play(); return; } playNext(); });
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  document.getElementById('progressFill').style.width = (audio.currentTime / audio.duration * 100) + '%';
+  document.getElementById('currentTime').textContent = fmtTime(audio.currentTime);
+  document.getElementById('totalTime').textContent = fmtTime(audio.duration);
+});
+window.seekTo = function(e) {
+  const bar = document.getElementById('progressBar');
+  audio.currentTime = (e.offsetX / bar.clientWidth) * audio.duration;
+};
+window.setVolume = function(e) {
+  volume = Math.max(0, Math.min(1, e.offsetX / e.currentTarget.clientWidth));
+  document.getElementById('volumeFill').style.width = (volume * 100) + '%';
+  audio.volume = volume; isMuted = false;
+};
+window.toggleMute = function() { isMuted = !isMuted; audio.muted = isMuted; };
+window.toggleShuffle = function() { isShuffle = !isShuffle; document.getElementById('shuffleBtn').classList.toggle('active', isShuffle); };
+window.toggleRepeat = function() { isRepeat = !isRepeat; document.getElementById('repeatBtn').classList.toggle('active', isRepeat); };
+renderBonusUI();
+
+window.toggleLike = function(e, id) {
+  e.stopPropagation();
+  const idx = likedIds.indexOf(id);
+  if (idx === -1) { likedIds.push(id); showToast('♥ Добавлено в любимые'); }
+  else { likedIds.splice(idx, 1); showToast('Удалено из любимых'); }
+  localStorage.setItem('zm_liked', JSON.stringify(likedIds));
+  renderAllTrackLists();
+  saveUserLikes();
+  if (queue[currentIdx]?.id === id) {
+    const liked = likedIds.includes(id);
+    const heart = document.getElementById('playerHeart');
+    heart.classList.toggle('liked', liked);
+    heart.querySelector('svg').setAttribute('fill', liked ? 'currentColor' : 'none');
+  }
+};
+window.toggleLikeCurrent = function() {
+  if (currentIdx < 0) return;
+  const track = queue[currentIdx];
+  if (track) toggleLike({ stopPropagation: () => {} }, track.id);
+};
+
+window.handleSearch = function(q) {
+  if (!q.trim()) {
+    document.getElementById('searchResults').innerHTML = '<div class="empty-state"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><h3>Начни поиск</h3><p>Введи название трека или артиста</p></div>';
+    return;
+  }
+  const ql = q.toLowerCase();
+  const found = allTracks.filter(t => (t.title||'').toLowerCase().includes(ql) || (t.artist||'').toLowerCase().includes(ql) || (t.album||'').toLowerCase().includes(ql));
+  const el = document.getElementById('searchResults');
+  el.innerHTML = found.length ? found.map((t, i) => renderTrackItem(t, i, 'search')).join('') : '<div class="empty-state"><h3>Ничего не найдено</h3><p>Попробуй другой запрос</p></div>';
+};
+
+window.openPlaylist = function(id) {
+  const pl = allPlaylists.find(p => p.id === id);
+  if (!pl) return;
+  const plTracks = allTracks.filter(t => (pl.tracks || []).includes(t.id));
+  document.getElementById('playlistHeader').innerHTML = `
+    <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+      ${pl.cover ? `<img src="${pl.cover}" alt="" style="width:120px;height:120px;border-radius:14px;object-fit:cover">` : `<div style="width:120px;height:120px;border-radius:14px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:48px">🎵</div>`}
+      <div>
+        <div style="font-size:12px;color:var(--yellow);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Плейлист</div>
+        <div style="font-size:32px;font-weight:800;margin-bottom:6px;letter-spacing:-0.5px">${escapeHtml(pl.name || 'Плейлист')}</div>
+        <div style="color:var(--text2);font-size:14px;margin-bottom:18px">${plTracks.length} треков</div>
+        <button class="btn-primary" onclick="playPlaylist('${id}')"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>Слушать</button>
+      </div>
+    </div>`;
+  document.getElementById('playlistTracksList').innerHTML = plTracks.length ? plTracks.map((t, i) => renderTrackItem(t, i, 'pl_' + id)).join('') : '<div class="empty-state"><h3>В плейлисте нет треков</h3></div>';
+  showView('playlist', null);
+};
+window.playPlaylist = function(id) {
+  const pl = allPlaylists.find(p => p.id === id);
+  if (!pl) return;
+  const plTracks = allTracks.filter(t => (pl.tracks || []).includes(t.id));
+  if (!plTracks.length) return;
+  queue = plTracks; currentIdx = 0; loadAndPlay();
+};
+
+window.showView = function(name, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (name === 'search') document.getElementById('searchInput').focus();
+};
+
+function fmtTime(s) {
+  if (!s || isNaN(s)) return '0:00';
+  return `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+window.showToast = showToast;
+
+document.getElementById('volumeFill').style.width = (volume * 100) + '%';
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const ls = document.getElementById('loadingScreen');
+    ls.style.opacity = '0'; ls.style.transition = 'opacity .4s';
+    setTimeout(() => ls.remove(), 400);
+  }, 900);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowRight') audio.currentTime += 5;
+  if (e.code === 'ArrowLeft') audio.currentTime -= 5;
+  if (e.code === 'ArrowUp') { volume = Math.min(1, volume + 0.1); audio.volume = volume; document.getElementById('volumeFill').style.width = (volume*100)+'%'; }
+  if (e.code === 'ArrowDown') { volume = Math.max(0, volume - 0.1); audio.volume = volume; document.getElementById('volumeFill').style.width = (volume*100)+'%'; }
+});
+</script>
+</body>
+</html>
